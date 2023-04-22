@@ -1,16 +1,6 @@
 # heros_handbook
 
-A new Flutter project.
+Projeto desenvolvido para a matéria de Programação Para Dispositivos Móveis utilizando Flutter.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Descrição sobre o aplicativo e desenho da interface:
+  > https://www.figma.com/file/FFSrMKY2FaLFOwT4jiKijd/Hero's-handbook?node-id=13%3A2&t=0wPHKeodYkGX00Nu-1
