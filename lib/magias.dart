@@ -1,92 +1,163 @@
 import 'package:flutter/material.dart';
 import 'package:heros_handbook/criarmagia.dart';
-
 import 'descricaomagia.dart';
+import 'Data/magic_entity.dart';
+import 'Data/magic_sql.dart';
 
-// ignore: camel_case_types
 class magias extends StatelessWidget {
-  const magias({super.key});
+  final int characterId;
+
+  const magias({Key? key, required this.characterId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-      Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/images/oldpaper.jpg"),
-            fit: BoxFit.cover,
+    return Stack(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/images/oldpaper.jpg"),
+              fit: BoxFit.cover,
+            ),
           ),
         ),
-      ),
-      Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('Magias'),
+        Scaffold(
           backgroundColor: Colors.transparent,
-          elevation: 0, //
-        ),
-        body: const ListaMagias(),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: const Color.fromRGBO(117, 0, 0, 1),
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              return criarmagia();
-            }));
-          },
-          tooltip: 'Criar magia',
-          child: const Icon(
-            Icons.add,
-            color: Color.fromRGBO(224, 223, 213, 1),
+          appBar: AppBar(
+            title: const Text('Magias'),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+          ),
+          body: ListaMagias(characterId: characterId),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: const Color.fromRGBO(117, 0, 0, 1),
+            onPressed: () async {
+              final result = await Navigator.push<bool>(context, MaterialPageRoute(builder: (context) {
+                return criarmagia(characterId: characterId);
+              }));
+              if (result == true) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => ListaMagias(characterId: characterId)),
+                );
+              }
+            },
+            tooltip: 'Criar magia',
+            child: const Icon(
+              Icons.add,
+              color: Color.fromRGBO(224, 223, 213, 1),
+            ),
           ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }
 
 class ListaMagias extends StatefulWidget {
-  const ListaMagias({super.key});
+  final int characterId;
+
+  const ListaMagias({Key? key, required this.characterId}) : super(key: key);
 
   @override
-  State<ListaMagias> createState() => _MyStatefulWidgetState();
+  State<ListaMagias> createState() => _ListaMagiasState();
 }
 
-class _MyStatefulWidgetState extends State<ListaMagias> {
-  final List<int> _items = List<int>.generate(3, (int index) => index);
+class _ListaMagiasState extends State<ListaMagias> {
+  late Future<List<MagicEntity>> _magiasFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _magiasFuture = _loadMagias();
+  }
+
+  Future<List<MagicEntity>> _loadMagias() async {
+    final magias = await MagicSQL().getMagicByCharacter(widget.characterId);
+    return magias;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ReorderableListView(
+    return Container(
+      alignment: Alignment.center,
       padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
-      children: <Widget>[
-        for (int index = 0; index < _items.length; index += 1)
-          Card(
-            key: Key('$index'),
-            child: InkWell(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return const descricaomagia();
-                }));
+      child: FutureBuilder<List<MagicEntity>>(
+        future: _magiasFuture,
+        builder: (BuildContext context, AsyncSnapshot<List<MagicEntity>> snapshot) {
+          if (snapshot.hasData) {
+            final magias = snapshot.data!;
+            return ReorderableListView(
+              padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
+              children: <Widget>[
+                for (int index = 0; index < magias.length; index += 1)
+                  Card(
+                    key: Key('${magias[index].id_magic}'),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) {
+                          return DescricaoMagia(magia: magias[index]);
+                        }));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 10, bottom: 10),
+                        child: ListTile(
+                          leading: Icon(Icons.auto_fix_high_outlined),
+                          title: Text(magias[index].st_name ?? ''),
+                          subtitle: Text(magias[index].st_type ?? ''),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+              onReorder: (int oldIndex, int newIndex) {
+                setState(() {
+                  if (oldIndex < newIndex) {
+                    newIndex -= 1;
+                  }
+                  final MagicEntity item = magias.removeAt(oldIndex);
+                  magias.insert(newIndex, item);
+                });
               },
-              child: const Padding(
-                padding: EdgeInsets.only(top: 10, bottom: 10),
-                child: ListTile(
-                  leading: Icon(Icons.auto_fix_high_outlined),
-                  title: Text('Bola de Fogo'),
-                  subtitle: Text('Arcano - 2'),
-                ),
-              ),
-            ),
-          ),
-      ],
-      onReorder: (int oldIndex, int newIndex) {
-        setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
+            );
+          } else if (snapshot.hasError) {
+            return const Text('Erro ao carregar as magias');
+          } else {
+            return const CircularProgressIndicator();
           }
-          final int item = _items.removeAt(oldIndex);
-          _items.insert(newIndex, item);
-        });
-      },
+        },
+      ),
+    );
+  }
+}
+
+class DescricaoMagia extends StatelessWidget {
+  final MagicEntity magia;
+
+  const DescricaoMagia({Key? key, required this.magia}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(magia.st_name ?? ''),
+      ),
+      body: Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Nome: ${magia.st_name}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text('Tipo: ${magia.st_type}'),
+            const SizedBox(height: 10),
+            Text('Descrição: ${magia.st_description}'),
+          ],
+        ),
+      ),
     );
   }
 }

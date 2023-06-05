@@ -78,6 +78,7 @@ class _criarpersonagemState extends State<criarpersonagem> {
     final String characterClass = _classController.text;
 
     // Insert the character into the database
+
     final db = await Connection.getConexaoDB();
     final characterEntity = CharacterEntity(
       st_name: name,

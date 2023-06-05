@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:heros_handbook/criarpersonagem.dart';
+import 'Data/connection.dart';
+import 'Data/data_container.dart';
 import 'magias.dart';
 import 'Data/character_entity.dart';
 import 'Data/character_sql.dart';
@@ -172,7 +174,7 @@ Widget card(BuildContext context, CharacterEntity character) {
     child: InkWell(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return const magias();
+          return magias(characterId: character.id_character!);
         }));
       },
       child: Padding(
