@@ -32,13 +32,16 @@ class magias extends StatelessWidget {
           floatingActionButton: FloatingActionButton(
             backgroundColor: const Color.fromRGBO(117, 0, 0, 1),
             onPressed: () async {
-              final result = await Navigator.push<bool>(context, MaterialPageRoute(builder: (context) {
+              final result = await Navigator.push<bool>(context,
+                  MaterialPageRoute(builder: (context) {
                 return criarmagia(characterId: characterId);
               }));
               if (result == true) {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => ListaMagias(characterId: characterId)),
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          ListaMagias(characterId: characterId)),
                 );
               }
             },
@@ -77,47 +80,64 @@ class _ListaMagiasState extends State<ListaMagias> {
     return magias;
   }
 
+  Future<void> _deleteMagia(MagicEntity magia) async {
+    await MagicSQL().deleteMagic(magia.id_magic);
+    setState(() {
+      _magiasFuture = _loadMagias().then((magias) {
+        magias.remove(magia);
+        return magias;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
+      padding: const EdgeInsets.only(top: 30, left: 10, right: 10),
       child: FutureBuilder<List<MagicEntity>>(
         future: _magiasFuture,
-        builder: (BuildContext context, AsyncSnapshot<List<MagicEntity>> snapshot) {
+        builder:
+            (BuildContext context, AsyncSnapshot<List<MagicEntity>> snapshot) {
           if (snapshot.hasData) {
             final magias = snapshot.data!;
-            return ReorderableListView(
-              padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
-              children: <Widget>[
-                for (int index = 0; index < magias.length; index += 1)
-                  Card(
-                    key: Key('${magias[index].id_magic}'),
+            return ListView.builder(
+              padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+              itemCount: magias.length,
+              itemBuilder: (BuildContext context, int index) {
+                final magia = magias[index];
+                return Dismissible(
+                  key: UniqueKey(),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 16),
+                    color: Colors.transparent,
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
+                  ),
+                  onDismissed: (direction) => _deleteMagia(magias[index]),
+                  child: Card(
                     child: InkWell(
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) {
-                          return DescricaoMagia(magia: magias[index]);
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return descricaomagia(magia: magia);
                         }));
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(top: 10, bottom: 10),
                         child: ListTile(
-                          leading: Icon(Icons.auto_fix_high_outlined),
-                          title: Text(magias[index].st_name ?? ''),
-                          subtitle: Text(magias[index].st_type ?? ''),
+                          leading: const Icon(Icons.auto_fix_high_outlined),
+                          title: Text(magia.st_name ?? ''),
+                          subtitle: Text(magia.st_type ?? ''),
                         ),
                       ),
                     ),
                   ),
-              ],
-              onReorder: (int oldIndex, int newIndex) {
-                setState(() {
-                  if (oldIndex < newIndex) {
-                    newIndex -= 1;
-                  }
-                  final MagicEntity item = magias.removeAt(oldIndex);
-                  magias.insert(newIndex, item);
-                });
+                );
               },
             );
           } else if (snapshot.hasError) {
@@ -126,37 +146,6 @@ class _ListaMagiasState extends State<ListaMagias> {
             return const CircularProgressIndicator();
           }
         },
-      ),
-    );
-  }
-}
-
-class DescricaoMagia extends StatelessWidget {
-  final MagicEntity magia;
-
-  const DescricaoMagia({Key? key, required this.magia}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(magia.st_name ?? ''),
-      ),
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Nome: ${magia.st_name}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Text('Tipo: ${magia.st_type}'),
-            const SizedBox(height: 10),
-            Text('Descrição: ${magia.st_description}'),
-          ],
-        ),
       ),
     );
   }

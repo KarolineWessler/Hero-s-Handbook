@@ -70,7 +70,7 @@ class MagicSQL {
     });
   }
 
-  Future<void> deleteMagic(int magicId) async {
+  Future<void> deleteMagic(int? magicId) async {
     Database db = await Connection.getConexaoDB();
     await db.transaction((txn) async {
       await txn.rawUpdate(

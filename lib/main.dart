@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:heros_handbook/criarpersonagem.dart';
-import 'Data/connection.dart';
-import 'Data/data_container.dart';
+import 'package:flutter/foundation.dart';
+
 import 'magias.dart';
 import 'Data/character_entity.dart';
 import 'Data/character_sql.dart';
@@ -41,6 +41,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _charactersFuture = _loadCharacters();
+
+
   }
 
   Future<List<CharacterEntity>> _loadCharacters() async {
@@ -110,11 +112,9 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
 class _Body extends StatelessWidget {
   final Future<List<CharacterEntity>> charactersFuture;
-  final Function(CharacterEntity)
-      onDeleteCharacter; // Function to delete a character
+  final Function(CharacterEntity) onDeleteCharacter;
 
   const _Body({
     Key? key,
@@ -134,26 +134,24 @@ class _Body extends StatelessWidget {
           if (snapshot.hasData) {
             final characters = snapshot.data!;
             return ListView.builder(
-              physics: BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               itemCount: characters.length,
               itemBuilder: (BuildContext context, int index) {
                 final character = characters[index];
                 return Dismissible(
-                  key: Key(character.id_character
-                      .toString()), // Provide a unique key for each character
-                  direction: DismissDirection
-                      .endToStart, // Swipe from right to left to dismiss
+                  key: UniqueKey(),
+                  direction: DismissDirection.endToStart,
                   background: Container(
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.only(right: 16),
-                    color: Colors.red,
+                    color: Colors.transparent,
                     child: const Icon(
                       Icons.delete,
-                      color: Colors.white,
+                      color: Colors.red,
                     ),
                   ),
-                  onDismissed: (direction) => onDeleteCharacter(
-                      character), // Call the delete function when dismissed
+                  onDismissed: (direction) =>
+                      onDeleteCharacter(character),
                   child: card(context, character),
                 );
               },
@@ -180,7 +178,7 @@ Widget card(BuildContext context, CharacterEntity character) {
       child: Padding(
         padding: const EdgeInsets.only(top: 10, bottom: 10),
         child: ListTile(
-          leading: CircleAvatar(
+          leading: const CircleAvatar(
             backgroundImage: AssetImage(
                 "assets/images/nymeria.png"), // Use the character's image path
           ),
