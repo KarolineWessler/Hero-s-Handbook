@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:heros_handbook/magias.dart';
-import 'Data/magic_entity.dart';
-import 'Data/connection.dart';
-import 'Data/data_container.dart';
+import 'package:heros_handbook/Telas/magias.dart';
+import 'package:heros_handbook/Data/magic_entity.dart';
+import 'package:heros_handbook/Data/connection.dart';
+import 'package:heros_handbook/Data/data_container.dart';
 
 // ignore: camel_case_types
 class criarmagia extends StatefulWidget {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:heros_handbook/criarmagia.dart';
+import 'package:heros_handbook/Telas/criarmagia.dart';
+import 'package:heros_handbook/Telas/personagens.dart';
 import 'descricaomagia.dart';
-import 'Data/magic_entity.dart';
-import 'Data/magic_sql.dart';
+import 'package:heros_handbook/Data/magic_entity.dart';
+import 'package:heros_handbook/Data/magic_sql.dart';
+import 'package:heros_handbook/main.dart';
 
 class magias extends StatelessWidget {
   final int characterId;
@@ -27,6 +29,12 @@ class magias extends StatelessWidget {
             title: const Text('Magias'),
             backgroundColor: Colors.transparent,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pushNamed(context, '/personages');
+              },
+            ),
           ),
           body: ListaMagias(characterId: characterId),
           floatingActionButton: FloatingActionButton(
@@ -122,15 +130,16 @@ class _ListaMagiasState extends State<ListaMagias> {
                   child: Card(
                     child: InkWell(
                       onTap: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return descricaomagia(magia: magia);
-                        }));
+                        Navigator.pushNamed(context, '/descricaomagia',
+                            arguments: magia);
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(top: 10, bottom: 10),
                         child: ListTile(
-                          leading: const Icon(Icons.auto_fix_high_outlined),
+                          leading: const CircleAvatar(
+                            backgroundImage: AssetImage(
+                                "assets/images/magic.png"), // Use the character's image path
+                          ),
                           title: Text(magia.st_name ?? ''),
                           subtitle: Text(magia.st_type ?? ''),
                         ),

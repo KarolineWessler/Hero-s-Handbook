@@ -3,9 +3,9 @@ import 'package:heros_handbook/main.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
-import 'Data/character_entity.dart';
-import 'Data/connection.dart';
-import 'Data/data_container.dart';
+import 'package:heros_handbook/Data/character_entity.dart';
+import 'package:heros_handbook/Data/connection.dart';
+import 'package:heros_handbook/Data/data_container.dart';
 
 class criarpersonagem extends StatefulWidget {
   const criarpersonagem({Key? key}) : super(key: key);
@@ -15,7 +15,6 @@ class criarpersonagem extends StatefulWidget {
 }
 
 class _criarpersonagemState extends State<criarpersonagem> {
-
   TextEditingController _nameController = TextEditingController();
   TextEditingController _classController = TextEditingController();
 
@@ -56,12 +55,15 @@ class _criarpersonagemState extends State<criarpersonagem> {
             backgroundColor: const Color.fromRGBO(117, 0, 0, 1),
             foregroundColor: const Color.fromRGBO(224, 223, 213, 1),
             onPressed: () async {
-              _insertCharacter;
-              var result = await _insertCharacter();
-              _showSuccessMessage("Personagem criado com sucesso!");
-              if (result > 0) {
-                Navigator.pop(context, true);
-                main();
+              if (_validateInput()) {
+                var result = await _insertCharacter();
+                _showSuccessMessage("Personagem criado com sucesso!");
+                if (result > 0) {
+                  Navigator.pop(context, true);
+                  main();
+                }
+              } else {
+                _showErrorMessage("Por favor, preencha todas as informações.");
               }
             },
             tooltip: 'Criar personagem',
@@ -73,6 +75,13 @@ class _criarpersonagemState extends State<criarpersonagem> {
     );
   }
 
+  bool _validateInput() {
+    final String name = _nameController.text;
+    final String characterClass = _classController.text;
+
+    return name.isNotEmpty && characterClass.isNotEmpty;
+  }
+
   Future<int> _insertCharacter() async {
     final String name = _nameController.text;
     final String characterClass = _classController.text;
@@ -80,10 +89,7 @@ class _criarpersonagemState extends State<criarpersonagem> {
     // Insert the character into the database
 
     final db = await Connection.getConexaoDB();
-    final characterEntity = CharacterEntity(
-      st_name: name,
-      st_class: characterClass
-    );
+    final characterEntity = CharacterEntity(st_name: name, st_class: characterClass);
 
     int? characterID = await db.rawInsert('''
       INSERT INTO $CHARACTER_TABLE_NAME (
@@ -97,7 +103,6 @@ class _criarpersonagemState extends State<criarpersonagem> {
     ]);
 
     characterEntity.id_character = characterID;
-    print(characterEntity);
 
     // Clear the text fields
     _nameController.clear();
@@ -113,6 +118,11 @@ class _criarpersonagemState extends State<criarpersonagem> {
 
   _showSuccessMessage(message) {
     final snackBar = SnackBar(content: Text(message));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  _showErrorMessage(message) {
+    final snackBar = SnackBar(content: Text(message), backgroundColor: Colors.red);
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }
@@ -132,7 +142,6 @@ class _Body extends StatefulWidget {
 }
 
 class _BodyState extends State<_Body> {
-
   @override
   Widget build(BuildContext context) {
     return Form(

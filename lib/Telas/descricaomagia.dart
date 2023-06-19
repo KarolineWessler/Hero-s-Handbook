@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:heros_handbook/criarpersonagem.dart';
-
-import 'Data/magic_entity.dart';
 import 'editarmagia.dart';
-import 'main.dart';
 
-// ignore: camel_case_types
+import 'package:heros_handbook/Data/magic_entity.dart';
+import 'magias.dart';
+
 class descricaomagia extends StatefulWidget {
   final MagicEntity magia;
-  
+
   const descricaomagia({Key? key, required this.magia}) : super(key: key);
-  
 
   @override
   State<descricaomagia> createState() => _descricaomagiaState();
 }
 
 class _descricaomagiaState extends State<descricaomagia> {
+  
+  
   @override
   Widget build(BuildContext context) {
+     int? idCharacter = widget.magia.id_character;
+    
     return Stack(
       children: [
         Container(
@@ -35,21 +36,28 @@ class _descricaomagiaState extends State<descricaomagia> {
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return magias(characterId: idCharacter!);
+                }));
+              },
+            ),
           ),
           body: _Body(magia: widget.magia),
-          // floatingActionButton: FloatingActionButton.extended(
-          //   backgroundColor: const Color.fromRGBO(117, 0, 0, 1),
-          //   foregroundColor: const Color.fromRGBO(224, 223, 213, 1),
-          //   onPressed: () {
-          //     Navigator.push(context, MaterialPageRoute(builder: (context) {
-          //       // return editarmagia(magia: widget.magia);
-          //       return editarmagia(magia: widget.magia);
-          //     }));
-          //   },
-          //   tooltip: 'Editar magia',
-          //   label: const Text('Editar'),
-          //   icon: const Icon(Icons.edit),
-          // ),
+          floatingActionButton: FloatingActionButton.extended(
+            backgroundColor: const Color.fromRGBO(117, 0, 0, 1),
+            foregroundColor: const Color.fromRGBO(224, 223, 213, 1),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return editarmagia(magia: widget.magia);
+              }));
+            },
+            tooltip: 'Editar magia',
+            label: const Text('Editar'),
+            icon: const Icon(Icons.edit),
+          ),
         ),
       ],
     );
